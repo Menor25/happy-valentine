@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For You 🤍</title>
+
+<style>
+
+/* =========================
+   BODY + CANDLE FLICKER
+========================= */
+body{
+ margin:0;
+ height:100vh;
+ overflow:hidden;
+ font-family:'Segoe UI',sans-serif;
+ background:linear-gradient(135deg,#ff9a9e,#fad0c4);
+}
+
+/* candle glow overlay */
+body::before{
+ content:"";
+ position:fixed;
+ inset:0;
+ background:radial-gradient(circle at center,
+ rgba(255,200,150,0.25),
+ rgba(255,150,120,0.08),
+ transparent 70%);
+ animation:flicker 3s infinite alternate;
+ pointer-events:none;
+}
+
+@keyframes flicker{
+ 0%{opacity:.85}
+ 25%{opacity:.75}
+ 50%{opacity:.9}
+ 75%{opacity:.8}
+ 100%{opacity:.88}
+}
+
+/* =========================
+   START SCREEN
+========================= */
+#startScreen{
+ position:fixed;
+ inset:0;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ z-index:20;
+}
+
+.startBox{
+ background:white;
+ padding:25px 40px;
+ border-radius:15px;
+ font-size:20px;
+ box-shadow:0 15px 40px rgba(0,0,0,0.2);
+ cursor:pointer;
+}
+
+/* =========================
+   ENVELOPE
+========================= */
+#envelope{
+ position:fixed;
+ inset:0;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ z-index:15;
+ opacity:0;
+ pointer-events:none;
+}
+
+.mail{
+ width:220px;
+ height:140px;
+ background:#ff4d6d;
+ position:relative;
+ border-radius:6px;
+ cursor:pointer;
+}
+
+.flap{
+ position:absolute;
+ top:0;
+ border-left:110px solid transparent;
+ border-right:110px solid transparent;
+ border-top:70px solid #ff758f;
+ transform-origin:top;
+ transition:0.8s;
+}
+
+.open .flap{ transform:rotateX(180deg); }
+
+/* =========================
+   CARD
+========================= */
+.card{
+ position:relative;
+ width:90%;
+ max-width:500px;
+ margin:auto;
+ top:50%;
+ transform:translateY(-50%);
+ background:white;
+ padding:40px 30px;
+ border-radius:20px;
+ box-shadow:0 25px 60px rgba(0,0,0,0.25);
+ text-align:center;
+ opacity:0;
+ transition:opacity 2s ease;
+}
+
+.card h1{ color:#ff4d6d }
+
+/* =========================
+   HUG BUTTON
+========================= */
+.hugBtn{
+ margin-top:25px;
+ padding:12px 25px;
+ border:none;
+ border-radius:25px;
+ background:#ff6fa5;
+ color:white;
+ font-size:16px;
+ cursor:pointer;
+ box-shadow:0 10px 25px rgba(255,100,150,.4);
+}
+
+/* hug pulse hearts */
+.hugHeart{
+ position:fixed;
+ left:50%;
+ top:50%;
+ transform:translate(-50%,-50%) scale(0);
+ font-size:120px;
+ opacity:0;
+ animation:hugPop 1.2s ease forwards;
+ pointer-events:none;
+}
+
+@keyframes hugPop{
+ 0%{transform:translate(-50%,-50%) scale(0);opacity:0}
+ 50%{opacity:1}
+ 100%{transform:translate(-50%,-50%) scale(1.6);opacity:0}
+}
+
+/* floating hearts */
+.heart{
+ position:absolute;
+ font-size:22px;
+ animation:floatUp linear infinite;
+}
+
+@keyframes floatUp{
+ from{transform:translateY(100vh);opacity:0}
+ to{transform:translateY(-10vh);opacity:1}
+}
+
+</style>
+</head>
+
+<body>
+
+<audio id="music" loop>
+<source src="music.mp3">
+</audio>
+
+<div id="startScreen">
+ <div class="startBox">Tap to open your message 🤍</div>
+</div>
+
+<div id="envelope">
+ <div class="mail" id="mail">
+   <div class="flap"></div>
+ </div>
+</div>
+
+<div class="card" id="card">
+<h1 id="title"></h1>
+<p id="message"></p>
+
+<button class="hugBtn" onclick="sendHug()">Tap for a hug 🤗</button>
+</div>
+
+<script>
+
+/* =========================
+   HER NAME
+========================= */
+const herName="Whitney";
+
+/* =========================
+   LOVE MESSAGE
+========================= */
+const text = `Hey ${herName}...
+
+I don’t know what today feels like for you,
+but I hope this moment feels soft,
+warm, special and gentle on your heart.
+
+Life hasn’t been easy lately…
+but your strength has never gone unnoticed.
+
+Even on quiet days,
+even on heavy days…
+you are still standing,
+still glowing,
+still becoming.
+
+You are a strong,
+intelligent,
+and a beautiful soul.
+
+You don’t have to be strong all the time.
+You just have to keep being you.
+
+And that… is more than enough.
+
+You are valued.
+You are appreciated.
+You are never alone.
+
+Years ago, I set my priorities, 
+God first, then family, then i put relationship aside, stayed of it. But you came into my life and made me realize that love is also a priority.
+That is why anytime you call, you send a message I always respond asap. It is not availability or a weakness, it is called priority. No one is too busy.
+
+I may not be able to give you a bouquet of Naira notes today, but let the first delivery SabiBoy make be to the first lady and face of SabiBoy.
+
+Happy Valentine’s Day 🤍
+
+— Menor ❤️`;
+
+let i=0;
+function typeWriter(){
+ if(i<text.length){
+  document.getElementById("message").innerHTML+=text.charAt(i);
+  i++;
+  setTimeout(typeWriter,110);
+ }
+}
+
+/* =========================
+   MUSIC FADE
+========================= */
+function fadeInMusic(audio){
+ audio.volume=0;
+ audio.play();
+ let v=0;
+ let fade=setInterval(()=>{
+  if(v<0.5){v+=0.01;audio.volume=v}
+  else clearInterval(fade);
+ },200);
+}
+
+/* =========================
+   HEART FLOAT
+========================= */
+const hearts=["❤️","💖","💕","💘","💗"];
+function createHeart(){
+ let h=document.createElement("div");
+ h.className="heart";
+ h.innerText=hearts[Math.floor(Math.random()*hearts.length)];
+ h.style.left=Math.random()*100+"vw";
+ h.style.animationDuration=(6+Math.random()*5)+"s";
+ document.body.appendChild(h);
+ setTimeout(()=>h.remove(),11000);
+}
+
+/* =========================
+   HUG EFFECT
+========================= */
+function sendHug(){
+ let hug=document.createElement("div");
+ hug.className="hugHeart";
+ hug.innerText="💗";
+ document.body.appendChild(hug);
+ setTimeout(()=>hug.remove(),1200);
+}
+
+/* =========================
+   FLOW
+========================= */
+const start=document.getElementById("startScreen");
+const envelope=document.getElementById("envelope");
+const mail=document.getElementById("mail");
+const card=document.getElementById("card");
+const music=document.getElementById("music");
+
+document.getElementById("title").innerText=`Happy Valentine’s Day, ${herName} 🤍`;
+
+start.onclick=()=>{
+
+ // hide tap screen
+ start.style.display="none";
+
+ // show envelope
+ envelope.style.opacity=1;
+
+ // start music
+ fadeInMusic(music);
+
+ // auto open envelope after 1 second
+ setTimeout(()=>{
+   mail.classList.add("open");
+
+   // reveal message after flap animation
+   setTimeout(()=>{
+     envelope.style.display="none";
+     card.style.opacity=1;
+     typeWriter();
+     setInterval(createHeart,400);
+   },800);
+
+ },1000);
+
+};
+
+mail.onclick=()=>{
+ mail.classList.add("open");
+ setTimeout(()=>{
+   envelope.style.display="none";
+   card.style.opacity=1;
+   typeWriter();
+   setInterval(createHeart,400);
+ },800);
+};
+
+</script>
+
+</body>
+</html>
